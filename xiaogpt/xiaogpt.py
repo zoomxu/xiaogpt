@@ -361,7 +361,7 @@ class MiGPT:
             if custom_tts:
                 # await asyncio.sleep(3)
                 await self.mina_service.player_pause(self.device_id)
-                await self.stop_if_xiaoai_is_playing()
+                # await self.stop_if_xiaoai_is_playing()
                 await self.speak(self.string_to_async_iterator(custom_tts))
                 continue
 
