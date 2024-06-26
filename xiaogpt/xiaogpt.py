@@ -67,9 +67,9 @@ class MiGPT:
                 )
                 await self.polling_event.wait()
                 if (
-                    self.config.mute_xiaoai
-                    and new_record
-                    and self.need_ask_gpt(new_record)
+                        self.config.mute_xiaoai
+                        and new_record
+                        and self.need_ask_gpt(new_record)
                 ):
                     await self.stop_if_xiaoai_is_playing()
                 if (d := time.perf_counter() - start) < 1:
@@ -177,9 +177,9 @@ class MiGPT:
             return False
         query = record.get("query", "")
         return (
-            self.in_conversation
-            and not query.startswith(WAKEUP_KEYWORD)
-            or query.lower().startswith(tuple(w.lower() for w in self.config.keyword))
+                self.in_conversation
+                and not query.startswith(WAKEUP_KEYWORD)
+                or query.lower().startswith(tuple(w.lower() for w in self.config.keyword))
         )
 
     def need_change_prompt(self, record):
@@ -288,7 +288,7 @@ class MiGPT:
 
         async def collect_stream(queue):
             async for message in self.chatbot.ask_stream(
-                query, **self.config.gpt_options
+                    query, **self.config.gpt_options
             ):
                 await queue.put(message)
 
@@ -322,8 +322,8 @@ class MiGPT:
         playing_info = await self.mina_service.player_get_status(self.device_id)
         # WTF xiaomi api
         is_playing = (
-            json.loads(playing_info.get("data", {}).get("info", "{}")).get("status", -1)
-            == 1
+                json.loads(playing_info.get("data", {}).get("info", "{}")).get("status", -1)
+                == 1
         )
         return is_playing
 
@@ -353,6 +353,13 @@ class MiGPT:
             new_record = await self.last_record.get()
             self.polling_event.clear()  # stop polling when processing the question
             query = new_record.get("query", "").strip()
+
+            # 定制回复
+            custom_tts = self.config.custom_query_tts.get(query)
+            if not custom_tts:
+                await self.speak(self.string_to_async_iterator(custom_tts))
+                continue
+
             if query == self.config.start_conversation:
                 if not self.in_conversation:
                     print("开始对话")
@@ -377,7 +384,7 @@ class MiGPT:
                 continue
 
             # drop key words
-            query = re.sub(rf"^({'|'.join(self.config.keyword)})", "", query)
+            # query = re.sub(rf"^({'|'.join(self.config.keyword)})", "", query)
             # llama3 is not good at Chinese, so we need to add prompt in it.
             if self.config.bot == "llama":
                 query = f"你是一个基于llama3 的智能助手，请你跟我对话时，一定使用中文，不要夹杂一些英文单词，甚至英语短语也不能随意使用，但类似于 llama3 这样的专属名词除外, 问题是：{query}"
@@ -393,7 +400,7 @@ class MiGPT:
             else:
                 # waiting for xiaoai speaker done
                 await asyncio.sleep(8)
-            await self.do_tts(f"正在问{self.chatbot.name}请耐心等待")
+            # await self.do_tts(f"正在问{self.chatbot.name}请耐心等待")
             try:
                 print(
                     "以下是小爱的回答: ",
@@ -425,3 +432,6 @@ class MiGPT:
                 yield text
 
         await self.tts.synthesize(lang, gen())
+
+    async def string_to_async_iterator(self, tts: str) -> AsyncIterator[str]:
+        yield tts
