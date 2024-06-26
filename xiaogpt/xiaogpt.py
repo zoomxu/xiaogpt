@@ -359,8 +359,8 @@ class MiGPT:
             if custom_tts:
                 print("【query: " + str(query) + "】 " + "【定制回复: " + str(custom_tts) + "】")
             if custom_tts:
-                await asyncio.sleep(3)
-                await self.stop_if_xiaoai_is_playing()
+                # await asyncio.sleep(3)
+                # await self.stop_if_xiaoai_is_playing()
                 await self.speak(self.string_to_async_iterator(custom_tts))
                 continue
 
