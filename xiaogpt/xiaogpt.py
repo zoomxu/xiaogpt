@@ -356,7 +356,7 @@ class MiGPT:
 
             # 定制回复
             custom_tts = self.config.custom_query_tts.get(query)
-            print("【query: " + query + "】 " + "【定制回复: " + custom_tts + "】")
+            print("【query: " + str(query) + "】 " + "【定制回复: " + str(custom_tts) + "】")
             if not custom_tts:
                 await self.speak(self.string_to_async_iterator(custom_tts))
                 continue
